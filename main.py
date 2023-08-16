@@ -56,9 +56,12 @@ async def get_post(id: int):
         cursor.execute(f"select * from posts where posts.id = {id}")
         post = cursor.fetchone()
         # print(post['content'])
-        image_data = post['content']
-        print(image_data)
-        image = Image.open(io.BytesIO(image_data))
+        # image_data = post['content']
+        # print(image_data)
+        # image = Image.open(io.BytesIO(image_data))
+        image_path = os.path.join("upload", 'Screenshot from 2023-08-15 01-44-49.png')
+    # Image.open(image_path).save(image_path, quality=50)
+        image=Image.open(image_path)
         image.show()
         return {"data": post, "image":image.show()}
 
