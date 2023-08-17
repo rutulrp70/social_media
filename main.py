@@ -4,7 +4,7 @@ from typing import Optional, Annotated
 import psycopg2, shutil, io
 from psycopg2.extras import RealDictCursor
 from PIL import Image
-import os
+import os, base64
 
 
 app = FastAPI()
@@ -41,9 +41,13 @@ async def create_post(post: Post = Depends(), content: UploadFile = File(...)):
     # Image.open(image_path).save(image_path, quality=50)
 
     # file_location = f"./ss.png"
-    with open(os.path.join('upload', content.filename), "wb+") as file_object:
-        shutil.copyfileobj(content.file, file_object)  
+    # with open(os.path.join('upload', post.title), "wb+") as file_object:
+    #     shutil.copyfileobj(content.file, file_object)  
     # print(img.read())
+    fn, fext = os.path.splitext(content.filename)
+    img = Image.open(content.file)
+    img.thumbnail((200,200))
+    img.save(f'upload/{fn}_thumb{fext}')
 
     cursor.execute("INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) returning * ",(post.title, psycopg2.Binary(content.file.read()), post.published))
     print(post.title, content.file, post.published) #like objects we can access..
@@ -55,15 +59,13 @@ async def create_post(post: Post = Depends(), content: UploadFile = File(...)):
 async def get_post(id: int):
         cursor.execute(f"select * from posts where posts.id = {id}")
         post = cursor.fetchone()
-        # print(post['content'])
-        # image_data = post['content']
-        # print(image_data)
-        # image = Image.open(io.BytesIO(image_data))
-        image_path = os.path.join("upload", 'Screenshot from 2023-08-15 01-44-49.png')
-    # Image.open(image_path).save(image_path, quality=50)
-        image=Image.open(image_path)
-        image.show()
-        return {"data": post, "image":image.show()}
+        data=post['content']
+        image = Image.open(io.BytesIO(data))
+        image.show('upload/ss.png')
+        
+        # with open(os.path.join('upload', post['title']),'wb') as file:
+        #     file.write(base64.b64decode(data))
+        return {"data": "go see"}
 
 
 
